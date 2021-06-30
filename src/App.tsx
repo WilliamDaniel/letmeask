@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { Button } from "./components/Button";
+
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-       <h1>Hello Letmeask</h1>
-      </header>
+    <div>
+      <Button/>
+      <Button/>
+      <Button/>
     </div>
   );
 }
