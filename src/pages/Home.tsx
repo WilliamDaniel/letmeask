@@ -1,20 +1,25 @@
 import { useHistory } from 'react-router';
 
+import '../styles/auth.scss'
 import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from "../assets/images/logo.svg";
 import googleIconImg from "../assets/images/google-icon.svg";
 
 import { Button } from '../components/Button';
-
-
-import '../styles/auth.scss'
 import { useAuth } from '../hooks/userAuth';
+import { FormEvent } from 'react';
+import { useState } from 'react';
+import { database } from '../services/firebase';
 
 export function Home() {
 
     const history = useHistory();
     const { user, signInWithGoogle } = useAuth();
+    const [roomCode, setRoomCode] = useState('');
 
+    /**
+     * Cria nova sala
+     */
     async function handleCreateRoom() {
 
         if (!user) {
@@ -22,16 +27,31 @@ export function Home() {
         }
 
         history.push('/rooms/new');
-
     }
+    /**
+     * Entra na sala
+     */
+    async function handleJoinRoom(event: FormEvent) {
+        event.preventDefault();
 
+        if (roomCode.trim() === '') return;
+
+        const roomRef = await database.ref(`rooms/${roomCode}`).get();
+
+        if (!roomRef.exists()) {
+            alert(`Room ${roomCode} does not exist!`);
+            return;
+        }
+
+        history.push(`/rooms/${roomCode}`);
+    }
 
     return (
         <div id="page-auth">
             <aside>
                 <img src={illustrationImg} alt="Ilustração simbolizando perguntas e respostas" />
                 <strong>Crie salas de Q&amp;A ao-vivo</strong>
-                <p>Tire as dúvidas da sua audiêncoia em tempo-reat.</p>
+                <p>Tire as dúvidas da sua audiência em tempo-reat.</p>
             </aside>
             <main>
                 <div className="main-content">
@@ -41,10 +61,12 @@ export function Home() {
                         Crie sua sala com o Google
                     </button>
                     <div className="separator">ou entre em uma sala</div>
-                    <form>
+                    <form onSubmit={handleJoinRoom}>
                         <input
                             type="text"
                             placeholder="Digite o código da sala"
+                            onChange={event => setRoomCode(event.target.value)}
+                            value={roomCode}
                         />
                         <Button type="submit">Entrar na sala</Button>
                     </form>
